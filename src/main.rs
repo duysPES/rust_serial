@@ -1,6 +1,7 @@
 mod builder;
 
 use crate::builder::SerialContructor;
+use bytes::BytesMut;
 use serialport::{DataBits, FlowControl, Parity, SerialPortSettings, StopBits};
 use std::io::Error;
 use std::io::Write;
@@ -20,7 +21,12 @@ pub fn handle_serial(port: String, settings: SerialPortSettings) -> Result<(), s
 
             loop {
                 match p.read(buf.as_mut_slice()) {
-                    Ok(t) => std::io::stdout().write_all(&buf[..t]).unwrap(),
+                    Ok(t) => {
+                        //
+                        let bytes = BytesMut::from(&buf[..t]);
+                        // std::io::stdout().write_all(bytes).unwrap()
+                        println!("DATA: 0x{:x}", bytes);
+                    }
                     Err(ref e) if e.kind() == std::io::ErrorKind::TimedOut => (),
                     Err(e) => {
                         println!("{:?}", e);
